@@ -8,7 +8,7 @@ on:
 
 env:
   DOCKER_IMAGE: ghcr.io/min010324/devkor-bestudy
-  DOCKER_CONTAINER: devkor-bestudy
+  DOCKER_CONTAINER: devkor-bestudy-test
 
 jobs:
   build:
