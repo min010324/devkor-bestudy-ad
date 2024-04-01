@@ -32,7 +32,7 @@ export class AuthService {
     validateEmailAddress(loginRequestDto.email);
     validatePassword(loginRequestDto.password);
 
-    const userByEmail: User = await this.userService.getUser(
+    const userByEmail: User = await this.userService.getUserByEmail(
       loginRequestDto.email,
     );
     if (userByEmail) {
@@ -59,28 +59,36 @@ export class AuthService {
     // 비밀번호 암호화
     const passwordEnc = await hash(loginRequestDto.password, this.salt);
 
-    // token 생성
-    const token: TokenType = await this.generateToken(
-      loginRequestDto.email,
-      loginRequestDto.nickname,
-    );
     // 유저 생성
     const newUser: User = User.newEntity(
       loginRequestDto.nickname,
       loginRequestDto.email,
       passwordEnc,
-      token.refreshToken,
+      '',
     );
 
     // 유저 저장
-    await this.userService.updateUser(newUser);
+    let savedUser = await this.userService.updateUser(newUser);
 
-    return new ApiResponseDto({ user: { ...newUser }, token }, HttpStatus.OK);
+    // token 생성
+    const token: TokenType = await this.generateToken(
+      savedUser.id,
+      loginRequestDto.email,
+      loginRequestDto.nickname,
+    );
+    savedUser.refreshToken = token.refreshToken;
+    savedUser = await this.userService.updateUser(newUser);
+
+    return new ApiResponseDto({ user: { ...savedUser }, token }, HttpStatus.OK);
   }
 
   async login(loginUser: User): Promise<ApiResponseDto> {
     // 유효성 검증
-    const token = await this.generateToken(loginUser.email, loginUser.nickname);
+    const token = await this.generateToken(
+      loginUser.id,
+      loginUser.email,
+      loginUser.nickname,
+    );
     loginUser.refreshToken = token.refreshToken;
     const savedUser = await this.userService.updateUser(loginUser);
     return new ApiResponseDto({ user: { ...savedUser }, token }, HttpStatus.OK);
@@ -89,7 +97,7 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     validateEmailAddress(email); // email 유효성
 
-    const user: User = await this.userService.getUser(email);
+    const user: User = await this.userService.getUserByEmail(email);
 
     // password 유효성
     const isMatch = await compare(password, user.passwordEnc);
@@ -100,17 +108,23 @@ export class AuthService {
     return user;
   }
 
-  async generateToken(email: string, nickname: string): Promise<TokenType> {
-    const accessToken = await this.generateAccessToken(email, nickname);
+  async generateToken(
+    userId: number,
+    email: string,
+    nickname: string,
+  ): Promise<TokenType> {
+    const accessToken = await this.generateAccessToken(userId, email, nickname);
     const refreshToken = await this.generateRefreshToken(email, nickname);
     return { accessToken, refreshToken };
   }
 
   protected async generateAccessToken(
+    userId: number,
     email: string,
     nickname: string,
   ): Promise<string> {
     const payload = {
+      userId: userId,
       email: email,
       nickname: nickname,
     };
@@ -137,12 +151,13 @@ export class AuthService {
   }
 
   async refreshAccessToken(email: string, refreshToken: string) {
-    const user: User = await this.userService.getUser(email);
+    const user: User = await this.userService.getUserByEmail(email);
     if (user?.refreshToken !== refreshToken) {
       throw new UnauthorizedException('유효하지 않은 refresh token 입니다.');
     }
 
     const accessToken = await this.generateAccessToken(
+      user.id,
       user.email,
       user.nickname,
     );
@@ -151,14 +166,14 @@ export class AuthService {
   }
 
   async signout(email: string) {
-    const user: User = await this.userService.getUser(email);
+    const user: User = await this.userService.getUserByEmail(email);
     user.status = false;
     user.refreshToken = '';
     await this.userService.updateUser(user);
   }
 
   async changePassword(email: string, password: string) {
-    const user: User = await this.userService.getUser(email);
+    const user: User = await this.userService.getUserByEmail(email);
     const passwordEnc = await hash(password, this.salt);
     user.passwordEnc = passwordEnc;
     await this.userService.updateUser(user);

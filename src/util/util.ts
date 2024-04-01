@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 
+export const PAGING_LIMIT: number = 10;
 export const validateEmailAddress = (email: string) => {
   const regex = new RegExp(
     "([!#-'*+/-9=?A-Z^-~-]+(.[!#-'*+/-9=?A-Z^-~-]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(.[!#-'*+/-9=?A-Z^-~-]+)*|[[\t -Z^-~]*])",

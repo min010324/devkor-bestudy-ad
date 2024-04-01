@@ -14,8 +14,9 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'access') {
   }
 
   async validate(payload) {
+    const userId = payload.userId;
     const email = payload.email;
     const nickname = payload.nickname;
-    return { email, nickname };
+    return { userId, email, nickname };
   }
 }

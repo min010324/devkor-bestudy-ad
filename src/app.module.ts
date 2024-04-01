@@ -7,6 +7,8 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mailer/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { PostModule } from './post/post.module';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
       autoLoadEntities: true,
       synchronize: true,
       logging: true,
+      namingStrategy: new SnakeNamingStrategy(),
       timezone: 'Asia/Seoul',
       extra: {
         charset: 'utf8mb4_unicode_ci',
@@ -42,6 +45,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     UserModule,
     AuthModule,
     MailModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],
