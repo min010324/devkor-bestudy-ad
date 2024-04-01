@@ -11,17 +11,17 @@ export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'nickname' })
-  nickname: string;
+  @Column({ name: 'content' })
+  content: string;
 
-  @Column({ name: 'email' })
-  email: string;
+  @Column({ name: 'view_cnt' })
+  viewCnt: number;
 
-  @Column({ name: 'password_enc' })
-  passwordEnc: string;
+  @Column({ name: 'like_cnt' })
+  likeCnt: number;
 
-  @Column({ name: 'refresh_token' })
-  refreshToken: string;
+  @Column({ name: 'reply_cnt' })
+  replyCnt: number;
 
   @CreateDateColumn({ name: 'reg_date' })
   regDate: Date;
