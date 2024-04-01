@@ -23,9 +23,28 @@ export class User {
   @Column({ name: 'refresh_token' })
   refreshToken: string;
 
+  @Column({ name: 'status', default: true })
+  status: boolean;
+
   @CreateDateColumn({ name: 'reg_date' })
   regDate: Date;
 
   @UpdateDateColumn({ name: 'mod_date' })
   modDate: Date;
+
+  static newEntity(
+    nickname: string,
+    email: string,
+    passwordEnc: string,
+    refreshToken: string,
+    status?: boolean,
+  ): User {
+    const user = new User();
+    user.nickname = nickname;
+    user.email = email;
+    user.passwordEnc = passwordEnc;
+    user.refreshToken = refreshToken;
+    user.status = status || true;
+    return user;
+  }
 }

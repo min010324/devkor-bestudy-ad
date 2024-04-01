@@ -8,3 +8,12 @@ export const validateEmailAddress = (email: string) => {
     throw new BadRequestException('이메일 양식이 유효하지 않습니다.');
   }
 };
+
+export const validatePassword = (password: string) => {
+  const regex = new RegExp(
+    '^(?=.*[!@#$%^&*()_+{}\\[\\]:;<>,.?/~`\\-\\\\|]).{8,}$',
+  );
+  if (!regex.test(password)) {
+    throw new BadRequestException('비밀번호 양식이 유효하지 않습니다.');
+  }
+};
