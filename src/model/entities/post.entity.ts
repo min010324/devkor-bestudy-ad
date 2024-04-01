@@ -2,30 +2,47 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity('post')
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'content' })
+  @Column()
+  title: string;
+
+  @Column()
   content: string;
 
-  @Column({ name: 'view_cnt' })
+  @Column({ default: 0 })
   viewCnt: number;
 
-  @Column({ name: 'like_cnt' })
+  @Column({ default: 0 })
   likeCnt: number;
 
-  @Column({ name: 'reply_cnt' })
+  @Column({ default: 0 })
   replyCnt: number;
 
-  @CreateDateColumn({ name: 'reg_date' })
+  @CreateDateColumn()
   regDate: Date;
 
   @UpdateDateColumn({ name: 'mod_date' })
   modDate: Date;
+
+  @ManyToOne(() => User)
+  user: User;
+
+  static newEntity(title: string, content: string, user: User) {
+    const post: Post = new Post();
+    post.title = title;
+    post.content = content;
+    post.user = user;
+    return post;
+  }
 }
