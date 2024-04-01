@@ -23,6 +23,9 @@ import { MailerModule } from '@nestjs-modules/mailer';
       synchronize: true,
       logging: true,
       timezone: 'Asia/Seoul',
+      extra: {
+        charset: 'utf8mb4_unicode_ci',
+      },
     }),
     MailerModule.forRootAsync({
       useFactory: () => ({
