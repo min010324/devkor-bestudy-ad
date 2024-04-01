@@ -47,6 +47,13 @@ jobs:
           echo "DB_USER=${{ secrets.DB_USER}}" >> .env
           echo "DB_DATABASE=${{ secrets.DB_DATABASE}}" >> .env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY}}" >> .env
+          echo "MAIL_USER=${{ secrets.MAIL_USER}}" >> .env
+          echo "MAIL_PASS=${{ secrets.MAIL_PASS}}" >> .env
+          echo "ACCESS_TOKEN_SECRET_KEY=${{ secrets.ACCESS_TOKEN_SECRET_KEY}}" >> .env
+          echo "REFRESH_TOKEN_SECRET_KEY=${{ secrets.REFRESH_TOKEN_SECRET_KEY}}" >> .env
+          echo "ACCESS_TOKEN_EXPIRE_TIME=${{ secrets.ACCESS_TOKEN_EXPIRE_TIME}}" >> .env
+          echo "REFRESH_TOKEN_EXPIRE_TIME=${{ secrets.REFRESH_TOKEN_EXPIRE_TIME}}" >> .env
+          echo "HASH_SALT=${{ secrets.HASH_SALT}}" >> .env
 
           cat .env
       - name: Run Docker
