@@ -12,6 +12,11 @@ import { ReplyRequestDto } from './dto/reply.request.dto';
 import { Reply } from '../model/entities/reply.entity';
 import { LikePostRepository } from './likePost.repository';
 import { LikePost } from '../model/entities/likePost.entity';
+import { SortType } from '../type/post.type';
+import { PAGING_LIMIT } from '../util/util';
+import { Like } from 'typeorm';
+import { FindOptionsWhere } from 'typeorm/find-options/FindOptionsWhere';
+import { PostListResponseDto } from './dto/postList.response.dto';
 
 @Injectable()
 export class PostService {
@@ -47,7 +52,49 @@ export class PostService {
     });
     savedPost.reply = replyList;
 
-    return PostResponseDto.newEntity(savedPost);
+    const likeList = await this.likePostRepository.find({
+      where: { postId: post.id },
+      relations: ['user'],
+    });
+    const likeUserNameList = likeList.map((likeUser) => likeUser.user.nickname);
+
+    return PostResponseDto.newEntity(savedPost, likeUserNameList);
+  }
+
+  async getPostList(
+    keyword: string,
+    sort: SortType = SortType.DATE,
+    page: number = 1,
+  ) {
+    let whereOption: FindOptionsWhere<Post> = {
+      status: true,
+    };
+    if (keyword) {
+      whereOption = { ...whereOption, content: Like(`%${keyword}%`) };
+    }
+    const [postList, total] = await this.postRepository.findAndCount({
+      where: whereOption,
+      order: { regDate: 'ASC' },
+      take: PAGING_LIMIT,
+      skip: (page - 1) * PAGING_LIMIT,
+      relations: ['user'],
+    });
+
+    console.log('sort', sort);
+
+    if (sort == SortType.LIKE) {
+      postList.sort((prev: Post, next: Post) => {
+        return next.likeCnt - prev.likeCnt;
+      });
+    }
+
+    if (sort == SortType.VIEW) {
+      postList.sort((prev: Post, next: Post) => {
+        return next.viewCnt - prev.viewCnt;
+      });
+    }
+
+    return PostListResponseDto.newEntity(total, page, keyword, postList);
   }
 
   async updatePost(postDto: PostRequestDto, userId: number) {
@@ -127,7 +174,7 @@ export class PostService {
   async deleteReply(replyId: number, userId: number) {
     const reply = await this.replyRepository.findOne({
       where: { id: replyId },
-      relations: ['user'],
+      relations: ['user', 'post'],
     });
 
     if (!reply) {
@@ -139,5 +186,8 @@ export class PostService {
 
     reply.status = false;
     await this.replyRepository.save(reply);
+
+    reply.post.replyCnt -= 1;
+    await this.postRepository.save(reply.post);
   }
 }

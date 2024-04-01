@@ -12,7 +12,8 @@ export class PostResponseDto {
   regDate: Date;
   modDate: Date;
   replyList: ReplyResponseDto[];
-  static newEntity(post: Post) {
+  likeList: string[];
+  static newEntity(post: Post, likeList?: string[]) {
     const postResponseDto: PostResponseDto = new PostResponseDto();
     postResponseDto.postId = post.id;
     postResponseDto.title = post.title;
@@ -23,6 +24,7 @@ export class PostResponseDto {
     postResponseDto.replyCnt = post.replyCnt;
     postResponseDto.regDate = post.regDate;
     postResponseDto.modDate = post.modDate;
+    postResponseDto.likeList = likeList || [];
 
     const replyParentList = post.reply
       ?.filter((reply) => reply.depth == 0)
