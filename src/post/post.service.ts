@@ -4,20 +4,21 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PostRepository } from './post.repository';
-import { UserService } from '../user/user.service';
 import { Post } from '../model/entities/post.entity';
 import { PostRequestDto } from './dto/post.request.dto';
 import { PostResponseDto } from './dto/post.response.dto';
 import { ReplyRepository } from './reply.repository';
 import { ReplyRequestDto } from './dto/reply.request.dto';
 import { Reply } from '../model/entities/reply.entity';
+import { LikePostRepository } from './likePost.repository';
+import { LikePost } from '../model/entities/likePost.entity';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
+    private readonly likePostRepository: LikePostRepository,
     private readonly replyRepository: ReplyRepository,
-    private readonly userService: UserService,
   ) {}
 
   async getPost(postId: number) {
@@ -46,6 +47,23 @@ export class PostService {
     // const user: User = await this.userService.getUser(userId);
     const newPost = Post.newEntity(postDto.title, postDto.content, userId);
     return await this.postRepository.save(newPost);
+  }
+
+  async likePost(postId: number, userId: number) {
+    const post = await this.postRepository.findOne({ where: { id: postId } });
+    const existLike = await this.likePostRepository.findOne({
+      where: { userId: userId, postId: postId },
+    });
+    if (existLike) {
+      await this.likePostRepository.remove(existLike);
+      post.likeCnt -= 1;
+    } else {
+      const likePost = LikePost.newEntity(userId, postId);
+      await this.likePostRepository.save(likePost);
+      post.likeCnt += 1;
+    }
+
+    await this.postRepository.save(post);
   }
 
   async updateReply(replyDto: ReplyRequestDto, userId: number) {

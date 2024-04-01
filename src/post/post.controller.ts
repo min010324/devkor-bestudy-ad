@@ -27,6 +27,12 @@ export class PostController {
     return new ApiResponseDto({}, HttpStatus.OK);
   }
 
+  @Post('/like/:id')
+  async likePost(@Param('id') postId, @Req() req: any) {
+    await this.postService.likePost(postId, req.user.userId);
+    return new ApiResponseDto({}, HttpStatus.OK);
+  }
+
   @Get(':id')
   async getPost(@Param('id') postId: number, @Req() req: any) {
     const postResponseDto: PostResponseDto =

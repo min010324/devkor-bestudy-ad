@@ -37,7 +37,6 @@ export class Reply {
   user: User;
 
   @ManyToOne(() => Post)
-  @JoinColumn({ name: 'postId' })
   post: Post;
 
   @Column()
