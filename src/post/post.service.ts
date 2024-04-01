@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PostRepository } from './post.repository';
 import { UserService } from '../user/user.service';
 import { Post } from '../model/entities/post.entity';
@@ -7,7 +11,6 @@ import { PostResponseDto } from './dto/post.response.dto';
 import { ReplyRepository } from './reply.repository';
 import { ReplyRequestDto } from './dto/reply.request.dto';
 import { Reply } from '../model/entities/reply.entity';
-import { In } from 'typeorm';
 
 @Injectable()
 export class PostService {
@@ -20,7 +23,7 @@ export class PostService {
   async getPost(postId: number) {
     const post: Post = await this.postRepository.findOne({
       where: { id: postId },
-      relations: ['user', 'reply'],
+      relations: ['user'],
     });
 
     // 조회 시 조회 수 증가
@@ -29,9 +32,8 @@ export class PostService {
     const savedPost = await this.postRepository.save(post);
 
     // 유저 정보를 포함하여 유저 정보 가져옴
-    const replyIdList = post.reply?.map((reply) => reply.id);
     const replyList = await this.replyRepository.find({
-      where: { id: In(replyIdList) },
+      where: { postId: post.id },
       relations: ['user'],
       order: { regDate: 'ASC' },
     });
@@ -80,5 +82,22 @@ export class PostService {
     if (parentReply.post.id !== replyDto.postId) {
       throw new BadRequestException('요청하신 게시글 id가 잘못되었습니다.');
     }
+  }
+
+  async deleteReply(replyId: number, userId: number) {
+    const reply = await this.replyRepository.findOne({
+      where: { id: replyId },
+      relations: ['user'],
+    });
+
+    if (!reply) {
+      throw new BadRequestException('존재하지 않는 댓글입니다.');
+    }
+    if (reply.user.id !== userId) {
+      throw new UnauthorizedException('본인이 작성한 댓글이 아닙니다.');
+    }
+
+    reply.status = false;
+    await this.replyRepository.save(reply);
   }
 }

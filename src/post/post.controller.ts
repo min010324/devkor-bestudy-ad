@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
@@ -13,7 +14,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiResponseDto } from '../util/response.dto';
 import { PostRequestDto } from './dto/post.request.dto';
 import { PostResponseDto } from './dto/post.response.dto';
-import { Reply } from '../model/entities/reply.entity';
 import { ReplyRequestDto } from './dto/reply.request.dto';
 
 @Controller('post')
@@ -37,6 +37,12 @@ export class PostController {
   @Post('/reply')
   async saveReply(@Body() replyRequestDto: ReplyRequestDto, @Req() req: any) {
     await this.postService.updateReply(replyRequestDto, req.user.userId);
+    return new ApiResponseDto({}, HttpStatus.OK);
+  }
+
+  @Delete('/reply/:id')
+  async deleteReply(@Param('id') replyId: number, @Req() req: any) {
+    await this.postService.deleteReply(replyId, req.user.userId);
     return new ApiResponseDto({}, HttpStatus.OK);
   }
 }

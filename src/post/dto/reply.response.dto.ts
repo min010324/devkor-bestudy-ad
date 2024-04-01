@@ -13,10 +13,12 @@ export class ReplyResponseDto {
     const replyResponseDto: ReplyResponseDto = new ReplyResponseDto();
     replyResponseDto.replyId = reply.id;
     replyResponseDto.parentId = reply.parentId;
-    replyResponseDto.content = reply.content;
-    replyResponseDto.userNickName = reply.user.nickname;
-    replyResponseDto.regDate = reply.regDate;
-    replyResponseDto.modDate = reply.modDate;
+    replyResponseDto.content = reply.status
+      ? reply.content
+      : '삭제된 댓글입니다.';
+    replyResponseDto.userNickName = reply.status ? reply.user.nickname : '';
+    replyResponseDto.regDate = reply.status ? reply.regDate : null;
+    replyResponseDto.modDate = reply.status ? reply.modDate : null;
     return replyResponseDto;
   }
 }

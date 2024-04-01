@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -36,7 +37,11 @@ export class Reply {
   user: User;
 
   @ManyToOne(() => Post)
+  @JoinColumn({ name: 'postId' })
   post: Post;
+
+  @Column()
+  postId: number;
 
   static newEntity(
     content: string,
