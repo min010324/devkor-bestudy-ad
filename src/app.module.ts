@@ -3,6 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mailer/mail.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { PostModule } from './post/post.module';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 @Module({
   imports: [
@@ -17,7 +23,29 @@ import { ConfigModule } from '@nestjs/config';
       entities: [],
       autoLoadEntities: true,
       synchronize: true,
+      logging: true,
+      namingStrategy: new SnakeNamingStrategy(),
+      timezone: 'Asia/Seoul',
+      extra: {
+        charset: 'utf8mb4_unicode_ci',
+      },
     }),
+    MailerModule.forRootAsync({
+      useFactory: () => ({
+        transport: {
+          host: 'smtp.gmail.com',
+          port: 587,
+          auth: {
+            user: process.env.MAIL_USER,
+            pass: process.env.MAIL_PASS,
+          },
+        },
+      }),
+    }),
+    UserModule,
+    AuthModule,
+    MailModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],
