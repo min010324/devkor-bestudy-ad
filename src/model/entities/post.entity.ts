@@ -30,6 +30,9 @@ export class Post {
   @Column({ default: 0 })
   replyCnt: number;
 
+  @Column({ default: true })
+  status: boolean;
+
   @CreateDateColumn()
   regDate: Date;
 

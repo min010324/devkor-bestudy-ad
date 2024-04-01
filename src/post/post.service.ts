@@ -27,6 +27,13 @@ export class PostService {
       relations: ['user'],
     });
 
+    if (!post) {
+      throw new BadRequestException('존재하지 않는 게시글입니다.');
+    }
+    if (!post.status) {
+      throw new BadRequestException('이미 삭제된 게시글입니다.');
+    }
+
     // 조회 시 조회 수 증가
     // todo 유저당 1회
     post.viewCnt += 1;
@@ -47,6 +54,21 @@ export class PostService {
     // const user: User = await this.userService.getUser(userId);
     const newPost = Post.newEntity(postDto.title, postDto.content, userId);
     return await this.postRepository.save(newPost);
+  }
+
+  async deletePost(postId: number, userId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['user'],
+    });
+    if (!post) {
+      throw new BadRequestException('존재하지 않는 게시글입니다.');
+    }
+    if (post.user.id !== userId) {
+      throw new UnauthorizedException('본인이 작성한 게시글이 아닙니다.');
+    }
+    post.status = false;
+    return await this.postRepository.save(post);
   }
 
   async likePost(postId: number, userId: number) {
