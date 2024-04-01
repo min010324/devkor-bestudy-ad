@@ -6,7 +6,14 @@ import { User } from '../model/entities/user.entity';
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async getUser(email: string): Promise<User> {
+  async getUser(userId: number): Promise<User> {
+    const user: User = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User> {
     const user: User = await this.userRepository.findOne({
       where: { email: email },
     });

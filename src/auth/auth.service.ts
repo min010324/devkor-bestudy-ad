@@ -32,7 +32,7 @@ export class AuthService {
     validateEmailAddress(loginRequestDto.email);
     validatePassword(loginRequestDto.password);
 
-    const userByEmail: User = await this.userService.getUser(
+    const userByEmail: User = await this.userService.getUserByEmail(
       loginRequestDto.email,
     );
     if (userByEmail) {
@@ -97,7 +97,7 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     validateEmailAddress(email); // email 유효성
 
-    const user: User = await this.userService.getUser(email);
+    const user: User = await this.userService.getUserByEmail(email);
 
     // password 유효성
     const isMatch = await compare(password, user.passwordEnc);
@@ -151,7 +151,7 @@ export class AuthService {
   }
 
   async refreshAccessToken(email: string, refreshToken: string) {
-    const user: User = await this.userService.getUser(email);
+    const user: User = await this.userService.getUserByEmail(email);
     if (user?.refreshToken !== refreshToken) {
       throw new UnauthorizedException('유효하지 않은 refresh token 입니다.');
     }
@@ -166,14 +166,14 @@ export class AuthService {
   }
 
   async signout(email: string) {
-    const user: User = await this.userService.getUser(email);
+    const user: User = await this.userService.getUserByEmail(email);
     user.status = false;
     user.refreshToken = '';
     await this.userService.updateUser(user);
   }
 
   async changePassword(email: string, password: string) {
-    const user: User = await this.userService.getUser(email);
+    const user: User = await this.userService.getUserByEmail(email);
     const passwordEnc = await hash(password, this.salt);
     user.passwordEnc = passwordEnc;
     await this.userService.updateUser(user);
