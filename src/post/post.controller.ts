@@ -13,6 +13,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiResponseDto } from '../util/response.dto';
 import { PostRequestDto } from './dto/post.request.dto';
 import { PostResponseDto } from './dto/post.response.dto';
+import { Reply } from '../model/entities/reply.entity';
+import { ReplyRequestDto } from './dto/reply.request.dto';
 
 @Controller('post')
 @UseGuards(AuthGuard('access'))
@@ -30,5 +32,11 @@ export class PostController {
     const postResponseDto: PostResponseDto =
       await this.postService.getPost(postId);
     return new ApiResponseDto(postResponseDto, HttpStatus.OK);
+  }
+
+  @Post('/reply')
+  async saveReply(@Body() replyRequestDto: ReplyRequestDto, @Req() req: any) {
+    await this.postService.updateReply(replyRequestDto, req.user.userId);
+    return new ApiResponseDto({}, HttpStatus.OK);
   }
 }

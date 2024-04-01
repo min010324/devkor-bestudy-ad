@@ -2,12 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Reply } from './reply.entity';
 
 @Entity('post')
 export class Post {
@@ -38,10 +39,16 @@ export class Post {
   @ManyToOne(() => User)
   user: User;
 
-  static newEntity(title: string, content: string, user: User) {
+  @OneToMany(() => Reply, (reply) => reply.post)
+  reply: Reply[];
+
+  static newEntity(title: string, content: string, userId: number) {
     const post: Post = new Post();
     post.title = title;
     post.content = content;
+
+    const user = new User();
+    user.id = userId;
     post.user = user;
     return post;
   }

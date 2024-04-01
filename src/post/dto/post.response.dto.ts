@@ -1,6 +1,8 @@
 import { Post } from '../../model/entities/post.entity';
+import { ReplyResponseDto } from './reply.response.dto';
 
 export class PostResponseDto {
+  postId: number;
   title: string;
   content: string;
   userNickname: string;
@@ -9,8 +11,10 @@ export class PostResponseDto {
   replyCnt: number;
   regDate: Date;
   modDate: Date;
+  replyList: ReplyResponseDto[];
   static newEntity(post: Post) {
     const postResponseDto: PostResponseDto = new PostResponseDto();
+    postResponseDto.postId = post.id;
     postResponseDto.title = post.title;
     postResponseDto.content = post.content;
     postResponseDto.userNickname = post.user.nickname;
@@ -19,6 +23,27 @@ export class PostResponseDto {
     postResponseDto.replyCnt = post.replyCnt;
     postResponseDto.regDate = post.regDate;
     postResponseDto.modDate = post.modDate;
+
+    const replyParentList = post.reply
+      ?.filter((reply) => reply.depth == 0)
+      ?.map((reply) => {
+        return ReplyResponseDto.newEntity(reply);
+      });
+
+    const replyChildList = post.reply
+      ?.filter((reply) => reply.depth == 1)
+      ?.map((reply) => {
+        return ReplyResponseDto.newEntity(reply);
+      });
+
+    replyParentList?.forEach((parentReply) => {
+      parentReply.reReplyList = replyChildList?.filter(
+        (child) => child.parentId == parentReply.replyId,
+      );
+    });
+
+    postResponseDto.replyList = replyParentList;
+
     return postResponseDto;
   }
 }
